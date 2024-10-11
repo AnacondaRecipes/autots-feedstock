@@ -32,7 +32,6 @@ requirements:
 {% set tests_to_skip = "" %}
 
 {% set tests_to_skip = tests_to_skip + " test_all_default_models" %} 
-
 # Exception: Transformer PCA failed on fit from params median
 {% set tests_to_skip = tests_to_skip + " or test_anomaly_holiday_detectors" %}
 # AssertionError: False is not true : Model 'ETS' forecasts diverged from sample forecasts.
@@ -52,7 +51,6 @@ test:
     - autots.datasets
   commands:
     - pip check
-    #- pytest -vv . -k "not (test_all_default_models or test_models or test_sklearn or test_transforms or test_holiday_flag or test_date_part or test_model or test_constraint or test_event_risk or test_event_risk_univariate)"
     - pytest -v tests -k "not ({{ tests_to_skip }})"
   requires:
     - pip
@@ -73,7 +71,7 @@ about:
     AutoTS is a time series package for Python designed for rapidly deploying 
     high-accuracy forecasts at scale.
   doc_url: https://winedarksea.github.io/AutoTS
-  dev_irl: https://github.com/winedarksea/AutoTS
+  dev_url: https://github.com/winedarksea/AutoTS
 
 extra:
   recipe-maintainers:
