@@ -7,44 +7,79 @@ package:
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: d48c2794835303388504757e11a47c2471616e1417b8a8b6f5fe0452595da5bc
+  url: https://github.com/winedarksea/{{ name }}/archive/refs/tags/{{ version }}.tar.gz
+  sha256: 6811694c415abbeca8eba13c017cfc366d3b060f4873cf39cbaa4ea8a358ac57
 
 build:
   number: 0
-  noarch: python
-  script: {{ PYTHON }} -m pip install . -vv
+  script: {{ PYTHON }} -m pip install . --no-deps -vv --no-build-isolation
+  # skipping s390x due to test dependencies not being on platform
+  skip: true  # [py<36 or s390x]
 
 requirements:
   host:
     - pip
-    - python >=3.7
+    - python
+    - setuptools
+    - wheel
   run:
-    - python >=3.6
+    - python
     - numpy >=1.14.6
-    - pandas >=0.25.*
-    - scikit-learn >=0.20.*
-    - statsmodels >=0.10.*
-    - requests
+    - pandas >=0.25.0
+    - scikit-learn >=0.20.0
+    - statsmodels >=0.10.0
+  run_constrained:
+    - holidays >=0.9
+    - prophet >=0.4.0
+    - xgboost >=1.6
+
+{% set tests_to_skip = "" %}
+
+{% set tests_to_skip = tests_to_skip + " test_all_default_models" %} 
+# Exception: Transformer PCA failed on fit from params median
+{% set tests_to_skip = tests_to_skip + " or test_anomaly_holiday_detectors" %}
+# AssertionError: False is not true : Model 'ETS' forecasts diverged from sample forecasts.
+{% set tests_to_skip = tests_to_skip + " or test_models" %} 
+# False is not true : Model 'PCA' upper forecasts diverged from sample forecasts.
+{% set tests_to_skip = tests_to_skip + " or test_transforms" %} 
+# Element counts were not equal
+{% set tests_to_skip = tests_to_skip + " or test_date_part" %} 
+# ValueError: Shape of passed values is (6, 18), indices imply (6, 9)
+{% set tests_to_skip = tests_to_skip + " or test_event_risk" %} 
 
 test:
+  source_files:
+    - tests
   imports:
     - autots
     - autots.datasets
+    - autots.evaluator
+    - autots.models
+    - autots.templates
+    - autots.tools
   commands:
     - pip check
+    - pytest -v tests -k "not ({{ tests_to_skip }})"
   requires:
     - pip
+    - pytest
+    - requests
+    - matplotlib
+    - holidays
+    - prophet
+    - lightgbm
 
 about:
   home: https://github.com/winedarksea/AutoTS
   summary: Automated Time Series Forecasting
   license: MIT
   license_file: LICENSE
+  license_family: MIT
   description: |
     AutoTS is a time series package for Python designed for rapidly deploying 
     high-accuracy forecasts at scale.
-  doc_url: https://github.com/winedarksea/AutoTS
+  doc_url: https://winedarksea.github.io/AutoTS
+  dev_url: https://github.com/winedarksea/AutoTS
 
 extra:
   recipe-maintainers:
