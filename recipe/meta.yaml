@@ -14,7 +14,7 @@ build:
   number: 0
   script: {{ PYTHON }} -m pip install . --no-deps -vv --no-build-isolation
   # skipping s390x due to test dependencies not being on platform
-  skip: true  # [py<37 or s390x]
+  skip: true  # [py<36 or s390x]
 
 requirements:
   host:
@@ -26,8 +26,12 @@ requirements:
     - python
     - numpy >=1.14.6
     - pandas >=0.25.0
-    - scikit-learn >=0.20.*
-    - statsmodels >=0.10.*
+    - scikit-learn >=0.20.0
+    - statsmodels >=0.10.0
+  run_constrained:
+    - holidays >=0.9
+    - prophet >=0.4.0
+    - xgboost >=1.6
 
 {% set tests_to_skip = "" %}
 
@@ -49,6 +53,10 @@ test:
   imports:
     - autots
     - autots.datasets
+    - autots.evaluator
+    - autots.models
+    - autots.templates
+    - autots.tools
   commands:
     - pip check
     - pytest -v tests -k "not ({{ tests_to_skip }})"
